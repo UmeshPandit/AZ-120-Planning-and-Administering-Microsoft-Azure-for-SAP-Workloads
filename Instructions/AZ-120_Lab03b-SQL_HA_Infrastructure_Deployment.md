@@ -1,11 +1,11 @@
-# AZ 120 Module 3: Implementing SAP on Azure
+# AZ 120 Module 4: Deploy SAP on Azure
 # Lab 3b: Implement SAP architecture on Azure VMs running Windows
 
 Estimated Time: 150 minutes
 
 All tasks in this lab are performed from the Azure portal (including a PowerShell Cloud Shell session)  
 
-   > **Note**: When not using Cloud Shell, the lab virtual machine must have Az PowerShell module installed [**https://docs.microsoft.com/en-us/powershell/azure/install-az-ps-msi?view=azps-2.8.0**](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps-msi?view=azps-2.8.0).
+   > **Note**: When not using Cloud Shell, the lab virtual machine must have Az PowerShell module installed [**https://docs.microsoft.com/en-us/powershell/azure/install-az-ps-msi**](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps-msi).
 
 Lab files: none
 
@@ -25,9 +25,9 @@ After completing this lab, you will be able to:
 
 ## Requirements
 
--   A Microsoft Azure subscription with the sufficient number of available DSv2 and Dsv3 vCPUs (four Standard_DS1_v2 VM with 1 vCPU and six Standard_D4s_v3 VMs with 4 vCPUs each) in an Azure region that supports availability zones
+-   A Microsoft Azure subscription with the sufficient number of available Dsv3 vCPUs (four Standard_D2s_v3 VM with 2 vCPU and six Standard_D4s_v3 VMs with 4 vCPUs each) in an Azure region that supports availability zones
 
--   A lab computer running Windows 10, Windows Server 2016, or Windows Server 2016 with access to Azure
+-   A lab computer with an Azure Cloud Shell-compatible web browser and access to Azure
 
 
 ## Exercise 1: Provision Azure resources necessary to support highly available SAP NetWeaver deployments
@@ -46,11 +46,11 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
 1.  From the **New** blade, initiate creation of a new **Template deployment (deploy using custom templates)**
 
-1.  From the **Custom deployment** blade, in the **Load a GitHub quickstart template** drop-down list, select the entry **active-directory-new-domain-ha-2-dc-zones**, and click **Select template**.
+1.  From the **Custom deployment** blade, in the **Quickstart template (disclaimer)** drop-down list, select the entry **application-workloads/active-directory/active-directory-new-domain-ha-2-dc-zones**, and click **Select template**.
 
     > **Note**: Alternatively, you can launch the deployment by navigating to Azure Quickstart Templates page at <https://github.com/Azure/azure-quickstart-templates>, locating the template named **Create 2 new Windows VMs, a new AD Forest, Domain and 2 DCs in separate availability zones**, and initiating its deployment by clicking **Deploy to Azure** button.
 
-1.  On the blade **Create a new AD Domain with 2 DCs using Availability Zones**, specify the following settings and click **Purchase** to initiate the deployment:
+1.  On the blade **Create a new AD Domain with 2 DCs using Availability Zones**, specify the following settings, click **Review + create**, and then click **Create** to initiate the deployment:
 
     -   Subscription: *the name of your Azure subscription*
 
@@ -68,15 +68,14 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Domain Name: **adatum.com**
 
-    -   DnsPrefix: *accept the default value*
+    -   DnsPrefix: *Use any unique valid DNS prefix*
 
-    -   Vm Size: **Standard D4S\_v3**
+    -   Vm Size: **Standard D2s\_v3**
 
-    -   _artifacts Location: *accept the default value*
+    -   _artifacts Location: *https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/application-workloads/active-directory/active-directory-new-domain-ha-2-dc-zones/*
 
     -   _artifacts Location Sas Token: *leave blank*
 
-    -   I agree to the terms and conditions stated above: *enabled*
 
     > **Note**: The deployment should take about 35 minutes. Wait for the deployment to complete before you proceed to the next task.
 
@@ -140,21 +139,17 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
 1.  On the lab computer, in the Azure portal, search for and select **Template deployment (deploy using custom template)**.
 
-1.  On the **Custom deployment** blade, in the **Select a template (disclaimer)** drop-down list, type **sap-3-tier-marketplace-image-md** and click **Select template**.
+1.  On the **Custom deployment** blade, in the **Quickstart template (disclaimer)** drop-down list, type **application-workloads/sap/sap-3-tier-marketplace-image-md** and click **Select template**.
 
     > **Note**: Make sure to use Microsoft Edge or a third party browser. Do not use Internet Explorer.
 
 1.  On the **SAP NetWeaver 3-tier (managed disk)** blade, select **Edit template**.
 
-1.  On the **Edit template** blade, apply the following changes and select **Save**:
+1.  On the **Edit template** blade, apply the following change and select **Save**:
 
     -   in the line **197**, replace `"dbVMSize": "Standard_E8s_v3",` with `"dbVMSize": "Standard_D4s_v3",`
 
-    -   in the line **198**, replace `"ascsVMSize": "Standard_D2s_v3",` with `"ascsVMSize": "Standard_DS1_v2",`
-
-    -   in the line **199**, replace `"diVMSize": "Standard_D2s_v3",` with `"diVMSize": "Standard_DS1_v2",`
-
-1.  Back on the **SAP NetWeaver 3-tier (managed disk)** blade, initiate deployment with the following settings:
+1.  Back on the **SAP NetWeaver 3-tier (managed disk)** blade, specify the following settings, click **Review + create**, and then click **Create** to initiate the deployment:
 
     -   Subscription: *the name of your Azure subscription*
 
@@ -186,15 +181,14 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Location: **[resourceGroup().location]**
 
-    -   _artifacts Location: **https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/sap-3-tier-marketplace-image-md/**
+    -   _artifacts Location: **https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/application-workloads/sap/sap-3-tier-marketplace-image-md/**
 
     -   _artifacts Location Sas Token: *leave blank*
 
-    -   I agree to the terms and conditions stated above: *enabled*
 
 1.  Do not wait for the deployment to complete but instead proceed to the next task. 
 
-### Task 5: Deploy the Scale-Out File Server (SOFS) cluster
+### Task 4: Deploy the Scale-Out File Server (SOFS) cluster
 
 In this task, you will deploy the scale-out file server (SOFS) cluster that will be hosting a file share for the SAP ASCS servers by using an Azure Resource Manager QuickStart template from GitHub available at [**https://github.com/robotechredmond/301-storage-spaces-direct-md**](https://github.com/robotechredmond/301-storage-spaces-direct-md). 
 
@@ -204,7 +198,7 @@ In this task, you will deploy the scale-out file server (SOFS) cluster that will
 
 1.  On the page titled **Use Managed Disks to Create a Storage Spaces Direct (S2D) Scale-Out File Server (SOFS) Cluster with Windows Server 2016**, click **Deploy to Azure**. This will automatically redirect your browser to the Azure portal and display the **Custom deployment** blade.
 
-1.  From the **Custom deployment** blade, initiate a deployment with the following settings:
+1.  From the **Custom deployment** blade, specify the following settings, click **Review + create**, and then click **Create** to initiate the deployment:
 
     -   Subscription: **Your Azure subscription name**.
 
@@ -214,7 +208,7 @@ In this task, you will deploy the scale-out file server (SOFS) cluster that will
 
     -   Name Prefix: **i20**
 
-    -   Vm Size: **Standard D4S\_v3**
+    -   Vm Size: **Standard D4s\_v3**
 
     -   Enable Accelerated Networking: **true**
 
@@ -256,8 +250,6 @@ In this task, you will deploy the scale-out file server (SOFS) cluster that will
 
     -   \_artifacts Location Sas Token: **Leave the default value**
 
-    -   I agree to the terms and conditions stated above: *enabled*
-
 1.  The deployment might take about 20 minutes. Do not wait for the deployment to complete but instead proceed to the next task.
 
 ### Task 5: Deploy a jump host
@@ -266,7 +258,7 @@ In this task, you will deploy the scale-out file server (SOFS) cluster that will
 
 1.  From the lab computer, in the Azure portal interface, click **+ Create a resource**.
 
-1.  From the **New** blade, initiate creation of a new Azure VM based on the **Windows Server 2019 Datacenter** image.
+1.  From the **New** blade, initiate creation of a new Azure VM based on the **Windows Server 2019 Datacenter - Gen1** image.
 
 1.  Provision a Azure VM with the following settings:
 
@@ -280,9 +272,9 @@ In this task, you will deploy the scale-out file server (SOFS) cluster that will
 
     -   Availability options: **No infrastructure redundancy required**
 
-    -   Image: **Windows Server 2019 Datacenter**
+    -   Image: **Windows Server 2019 Datacenter Gen2**
 
-    -   Size: **Standard DS1 v2**
+    -   Size: **Standard_D2s_v3**
 
     -   Username: **Student**
 
@@ -345,7 +337,7 @@ In this exercise, you will configure operating system of Azure VMs running Windo
 
 1.  In the Azure Portal, navigate to the blade of the virtual network named **adVNET**, which was provisioned automatically in the first exercise of this lab.
 
-1.  Display the **adVNET - DNS servers** blade and note that the virtual network is configured with the private IP addresses assigned to the domain controllers deployed in the first exercise of this lab as its DNS servers.
+1.  Display the **adVNET - DNS servers** blade and notice that the virtual network is configured with the private IP addresses assigned to the domain controllers deployed in the first exercise of this lab as its DNS servers.
 
 1.  In the Azure Portal, start a PowerShell session in Cloud Shell. 
 
@@ -387,9 +379,9 @@ In this exercise, you will configure operating system of Azure VMs running Windo
 
 1.  Use Remote Desktop to connect to **i20-db-1.adatum.com** Azure VM with the same credentials.
 
-1.  Within the RDP session to i20-db-0.adatum.com, use File and Storage Services in the Server Manager to examine the disk configuration. Note that a single data disk has been configured via volume mounts to provide storage for database and log files. 
+1.  Within the RDP session to i20-db-0.adatum.com, use File and Storage Services in the Server Manager to examine the disk configuration. Notice that a single data disk has been configured via volume mounts to provide storage for database and log files. 
 
-1.  Within the RDP session to i20-db-1.adatum.com, use File and Storage Services in the Server Manager to examine the disk configuration. Note that a single data disk has been configured via volume mounts to provide storage for database and log files. 
+1.  Within the RDP session to i20-db-1.adatum.com, use File and Storage Services in the Server Manager to examine the disk configuration. Notice that a single data disk has been configured via volume mounts to provide storage for database and log files. 
 
 
 ### Task 3: Prepare for configuration of Failover Clustering on Azure VMs running Windows Server 2016 to support a highly available SAP NetWeaver installation.
@@ -420,17 +412,15 @@ In this exercise, you will configure operating system of Azure VMs running Windo
 
     -   Performance: **Standard**
 
-    -   Account kind: **Storage (general purpose v1)**
-
     -   Replication: **Locally-redundant storage (LRS)**
 
     -   Connectivity method: **Public endpoint (all networks)**
 
-    -   Secure transfer required: **Enabled**
+    -   Require secure transfer for REST API operations: **Enabled**
 
     -   Large file shares: **Disabled**
 
-    -   Blob soft delete: **Disabled**
+    -   Blob, container, and file share soft delete: **Disabled**
 
     -   Hierarchical namespace: **Disabled**
 
@@ -449,14 +439,14 @@ In this exercise, you will configure operating system of Azure VMs running Windo
 
 1.  In Active Directory Administrative Center, create a new organizational unit named **Clusters** in the root of the adatum.com domain.
 
-1.  In Active Directory Administrative Center, move the computer accounts of i20-db-0 and i20-db-1 from the Computers container to the Clusters organizational unit.
+1.  In Active Directory Administrative Center, move the computer accounts of i20-db-0 and i20-db-1 from the **Computers** container to the **Clusters** organizational unit.
 
 1.  Within the RDP session to i20-db-0, start a Windows PowerShell ISE session and create a new cluster by running the following:
 
     ```
     $nodes = @('i20-db-0','i20-db-1')
 
-    New-Cluster -Name az12003b-db-cl0 -Node $nodes -NoStorage -StaticAddress 10.0.1.6
+    New-Cluster -Name az12003b-db-cl0 -Node $nodes -NoStorage -StaticAddress 10.0.1.15
     ```
 
 1.  Within the RDP session to i20-db-0.adatum.com, switch to the **Active Directory Administrative Center** console.
@@ -467,7 +457,7 @@ In this exercise, you will configure operating system of Azure VMs running Windo
 
 1.  On the **Security** tab, click the **Advanced** button to open the **Advanced Security Settings for Clusters** window. 
 
-1.  On the **Permissions** tab of the **Advanced Security Settings for Computers** window, click **Add**.
+1.  On the **Permissions** tab of the **Advanced Security Settings for Clusters** window, click **Add**.
 
 1.  In the **Permission Entry for Clusters** window, click **Select Principal**
 
@@ -480,6 +470,8 @@ In this exercise, you will configure operating system of Azure VMs running Windo
 1.  Within the Windows PowerShell ISE session, install the Az PowerShell module by running the following:
 
     ```
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    
     Install-PackageProvider -Name NuGet -Force
 
     Install-Module -Name Az -Force
@@ -511,7 +503,7 @@ In this exercise, you will configure operating system of Azure VMs running Windo
 
 1.  To verify the resulting configuration, within the RDP session to i20-db-0.adatum.com, from the **Tools** menu in Server Manager, start **Failover Cluster Manager**.
 
-1.  In the **Failover Cluster Manager** console, review the **az12003b-db-cl0** cluster configuration, including its nodes, as well as is witness and network settings. Note that the cluster does not have any shared storage.
+1.  In the **Failover Cluster Manager** console, review the **az12003b-db-cl0** cluster configuration, including its nodes, as well as its witness and network settings. Notice that the cluster does not have any shared storage.
 
 
 ### Task 6: Configure Failover Clustering on Azure VMs running Windows Server 2016 to support a highly available ASCS tier of the SAP NetWeaver installation.
@@ -530,14 +522,14 @@ In this exercise, you will configure operating system of Azure VMs running Windo
 
 1.  In Active Directory Administrative Center, navigate to the **Computers** container. 
 
-1.  In Active Directory Administrative Center, move the computer accounts of i20-ascs-0 and i20-ascs-1 from the Computers container to the Clusters organizational unit.
+1.  In Active Directory Administrative Center, move the computer accounts of i20-ascs-0 and i20-ascs-1 from the **Computers** container to the **Clusters** organizational unit.
 
 1.  Within the RDP session to i20-ascs-0.adatum.com, start a Windows PowerShell ISE session and create a new cluster by running the following:
 
     ```
     $nodes = @('i20-ascs-0','i20-ascs-1')
 
-    New-Cluster -Name az12003b-ascs-cl0 -Node $nodes -NoStorage -StaticAddress 10.0.1.7
+    New-Cluster -Name az12003b-ascs-cl0 -Node $nodes -NoStorage -StaticAddress 10.0.1.16
     ```
 
 1.  Within the RDP session to i20-ascs-0.adatum.com, switch to the **Active Directory Administrative Center** console.
@@ -561,6 +553,8 @@ In this exercise, you will configure operating system of Azure VMs running Windo
 1.  Within the Windows PowerShell ISE session, install the Az PowerShell module by running the following:
 
     ```
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    
     Install-PackageProvider -Name NuGet -Force
 
     Install-Module -Name Az -Force
@@ -592,7 +586,7 @@ In this exercise, you will configure operating system of Azure VMs running Windo
 
 1.  To verify the resulting configuration, Within the RDP session to i20-ascs-0.adatum.com, from the **Tools** menu in Server Manager, start **Failover Cluster Manager**.
 
-1.  In the **Failover Cluster Manager** console, review the **az12003b-ascs-cl0** cluster configuration, including its nodes, as well as is witness and network settings. Note that the cluster does not have any shared storage.
+1.  In the **Failover Cluster Manager** console, review the **az12003b-ascs-cl0** cluster configuration, including its nodes, as well as is witness and network settings. Notice that the cluster does not have any shared storage.
 
 
 ### Task 7: Set permissions on the \\\\GLOBALHOST\\sapmnt share

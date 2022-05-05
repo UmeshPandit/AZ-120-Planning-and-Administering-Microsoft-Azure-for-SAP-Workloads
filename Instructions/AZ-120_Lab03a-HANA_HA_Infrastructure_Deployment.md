@@ -1,11 +1,11 @@
-# AZ 120 Module 3: Implementing SAP on Azure
+# AZ 120 Module 4: Deploy SAP on Azure
 # Lab 3a: Implement SAP architecture on Azure VMs running Linux
 
 Estimated Time: 100 minutes
 
 All tasks in this lab are performed from the Azure portal (including the Bash Cloud Shell session)  
 
-   > **Note**: When not using Cloud Shell, the lab virtual machine must have Azure CLI installed [**https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest**](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest).
+   > **Note**: When not using Cloud Shell, the lab virtual machine must have Azure CLI installed [**https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows**](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows).
 
 Lab files: none
 
@@ -25,9 +25,9 @@ After completing this lab, you will be able to:
 
 ## Requirements
 
--   A Microsoft Azure subscription with the sufficient number of available DSv2 and Dsv3 vCPUs (four Standard_DS1_v2 VMs with 1 vCPU each and two Standard_D4s_v3 VMs with 4 vCPUs each) in an Azure region that supports availability zones
+-   A Microsoft Azure subscription with the sufficient number of available Dsv3 vCPUs (four Standard_D2s_v3 VMs with 2 vCPUs each and two Standard_D4s_v3 VMs with 4 vCPUs each) in an Azure region that supports availability zones
 
--   A lab computer running Windows 10, Windows Server 2016, or Windows Server 2019 with access to Azure
+-   A lab computer with an Azure Cloud Shell-compatible web browser and access to Azure
 
 
 ## Exercise 1: Provision Azure resources necessary to support highly available SAP NetWeaver deployments
@@ -94,7 +94,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
 ### Task 2: Deploy Azure Resource Manager template provisioning Azure VMs running Linux SUSE that will host a highly available SAP NetWeaver deployment
 
-1.  On the lab computer, start a browser and browse to [**https://github.com/Azure/azure-quickstart-templates/tree/master/sap-3-tier-marketplace-image-md**](https://github.com/Azure/azure-quickstart-templates/tree/master/sap-3-tier-marketplace-image-md)
+1.  On the lab computer, start a browser and browse to [**https://github.com/Azure/azure-quickstart-templates/tree/master/application-workloads/sap/sap-3-tier-marketplace-image-md**](https://github.com/Azure/azure-quickstart-templates/tree/master/application-workloads/sap/sap-3-tier-marketplace-image-md)
 
     > **Note**: Make sure to use Microsoft Edge or a third party browser. Do not use Internet Explorer.
 
@@ -105,10 +105,6 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 1.  On the **Edit template** blade, apply the following changes and select **Save**:
 
     -   in the line **197**, replace `"dbVMSize": "Standard_E8s_v3",` with `"dbVMSize": "Standard_D4s_v3",`
-
-    -   in the line **198**, replace `"ascsVMSize": "Standard_D2s_v3",` with `"ascsVMSize": "Standard_DS1_v2",`
-
-    -   in the line **199**, replace `"diVMSize": "Standard_D2s_v3",` with `"diVMSize": "Standard_DS1_v2",`
 
 1.  On the **SAP NetWeaver 3-tier (managed disk)** blade, initiate deployment with the following settings:
 
@@ -142,7 +138,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Location: **[resourceGroup().location]**
 
-    -   _artifacts Location: **https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/sap-3-tier-marketplace-image-md/**
+    -   _artifacts Location: **https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/application-workloads/sap/sap-3-tier-marketplace-image-md/**
 
     -   _artifacts Location Sas Token: *leave blank*
 
@@ -165,7 +161,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
 1.  From the **New** blade, initiate creation of a new Azure VM based on the **Windows Server 2019 Datacenter** image.
 
-1.  Provision a Azure VM with the following settings:
+1.  Provision a Azure VM with the following settings (leave all others with their default values):
 
     -   Subscription: *the name of your Azure subscription*
 
@@ -177,9 +173,9 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Availability options: **No infrastructure redundancy required**
 
-    -   Image: **Windows Server 2019 Datacenter**
+    -   Image: **Windows Server 2019 Datacenter - Gen2**
 
-    -   Size: **Standard DS1 v2*** or similar*
+    -   Size: **Standard D2s_v3** or similar
 
     -   Username: **Student**
 
@@ -209,9 +205,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Place this virtual machine behind an existing load balancing solutions: **No**
 
-    -   Enable basic plan for free: **No**
-
-    -   Boot diagnostics: **Off**
+    -   Boot diagnostics: **Disable**
 
     -   OS guest diagnostics: **Off**
 
@@ -223,9 +217,11 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Enable backup: **Off**
 
-    -   Extensions: *None*
+    -   Patch orchestration options **Manual updates**
 
-    -   Tags: *None*
+    -   Extensions: **None**
+
+    -   Tags: **None**
 
 1.  Wait for the provisioning to complete. This should take a few minutes.
 
@@ -440,6 +436,7 @@ In this exercise, you will configure Azure VMs running SUSE Linux Enterprise Ser
 1. In the SSH session to i20-db-0, run the following to install Azure Python SDK required by the fence agent (when prompted, type **y** and press the **Enter** key):
 
     ```
+    SUSEConnect -p sle-module-public-cloud/12/x86_64
     zypper install python-azure-mgmt-compute
     ```
 
@@ -505,7 +502,7 @@ In this exercise, you will configure clustering on Azure VMs running Linux to su
     vi /etc/corosync/corosync.conf
     ```
 
-1.  In the vi editor, note the `transport: udpu` entry and the `nodelist` section:
+1.  In the vi editor, notice the `transport: udpu` entry and the `nodelist` section:
     ```
     [...]
        interface { 
@@ -569,9 +566,9 @@ In this exercise, you will configure clustering on Azure VMs running Linux to su
 
 1.  On the **Stonith app - Certificates & secrets** blade, click **+ New client secret**.
 
-1.  In the **Add a client secret** pane, in the **Description** text box, type **STONITH app key**, in the **Expires** section, leave the default **In 1 year**, and then click **Add**.
+1.  In the **Add a client secret** pane, in the **Description** text box, type **STONITH app key**, in the **Expires** section, leave the default **Recommended: 6 months**, and then click **Add**.
 
-1.  Copy the resulting secret value to Notepad (this entry is displayed only once, after you click **Add**). This will be referred to as **password** later in this exercise:
+1.  Copy the resulting **Value** to Notepad (this entry is displayed only once, after you click **Add**). This will be referred to as **password** later in this exercise:
 
 
 ### Task 5: Grant permissions to Azure VMs to the service principal of the STONITH app 

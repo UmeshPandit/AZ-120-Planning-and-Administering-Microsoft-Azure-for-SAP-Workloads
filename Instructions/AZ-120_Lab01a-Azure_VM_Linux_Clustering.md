@@ -1,11 +1,11 @@
-# AZ 120 Module 1: Foundations of SAP on Azure
-# Lab 1a: Implementing Linux clustering on Azure VMs
+# AZ 120 Module 2: Explore the foundations of IaaS for SAP on Azure
+# Lab 1a: Implement Linux clustering on Azure VMs
 
 Estimated Time: 90 minutes
 
 All tasks in this lab are performed from the Azure portal (including the Bash Cloud Shell session)  
 
-   > **Note**: When not using Cloud Shell, the lab virtual machine must have Azure CLI installed [**https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest**](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest) and include an SSH client e.g. PuTTY, available from [**https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html**](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html).
+   > **Note**: When not using Cloud Shell, the lab virtual machine must have Azure CLI installed [**https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows**](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows) and include an SSH client e.g. PuTTY, available from [**https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html**](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html).
 
 Lab files: none
 
@@ -27,7 +27,7 @@ After completing this lab, you will be able to:
 
 - A Microsoft Azure subscription with the sufficient number of available DSv3 vCPUs (2 x 4) and DSv2 (1 x 1) vCPUs
 
-- A lab computer running Windows 10, Windows Server 2016, or Windows Server 2019 with access to Azure
+- A lab computer with an Azure Cloud Shell-compatible web browser and access to Azure
 
 ## Exercise 1: Provision Azure compute resources necessary to support highly available SAP HANA deployments
 
@@ -41,7 +41,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
 1. If prompted, sign in with the work or school or personal Microsoft account with the owner or contributor role to the Azure subscription you will be using for this lab.
 
-1. In the Azure portal, use the **Search resources, services, and docs** text box at the top of the Azure portal page to search for and navigate to the **Proximity placement groups** blade and, on the **Proximity placement groups** blade, select **+ Add**.
+1. In the Azure portal, use the **Search resources, services, and docs** text box at the top of the Azure portal page to search for and navigate to the **Proximity placement groups** blade and, on the **Proximity placement groups** blade, select **+ create**.
 
 1. On the **Basics** tab of the **Create Proximity Placement Groups** blade, specify the following settings and select **Review + create**:
 
@@ -59,7 +59,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
    > **Note**: Wait for the provisioning to complete. This should take less than a minute.
 
-1. In the Azure portal, use the **Search resources, services, and docs** text box at the top of the Azure portal page to search for and navigate to the **Virtual machines** blade, then, on the **Virtual machines** blade, select **+ Add** and, in the drop-down menu, select **Virtual machine**.
+1. In the Azure portal, use the **Search resources, services, and docs** text box at the top of the Azure portal page to search for and navigate to the **Virtual machines** blade, then, on the **Virtual machines** blade, select **+ Create** and, in the drop-down menu, select **Azure virtual machine**.
 
 1. On the **Basics** tab of the **Create a virtual machine** blade, specify the following settings and select **Next: Disks >** (leave all other settings with their default value):
 
@@ -75,7 +75,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
    - Availability set: *a new availability set named* **az12001a-avset** *with 2 fault domains and 5 update domains*
 
-   - Image: **SUSE Enterprise Linux for SAP 12 SP5 - BYOS**
+   - Image: **SUSE Enterprise Linux for SAP 12 SP5 - BYOS - Gen 1**
    
    > **Note**: To locate the image, click the **See all images** link, on the **Select an image** blade, in the search text box, type **SUSE Enterprise Linux for SAP 12 BYOS** and, in the list of results, click **SUSE Enterprise Linux for SAP 12 SP5 - BYOS**.
 
@@ -133,11 +133,11 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
    - Proximity placement group: **az12001a-ppg**
 
-1. On the **Review + create** tab of the **Create Proximity Placement Groups** blade, select **Create**.
+1. On the **Review + create** tab of the **Create a virtual machine** blade, select **Create**.
 
    > **Note**: Wait for the provisioning to complete. This should take less about 3 minutes.
 
-1. In the Azure portal, use the **Search resources, services, and docs** text box at the top of the Azure portal page to search for and navigate to the **Virtual machines** blade, then, on the **Virtual machines** blade, select **+ Add** and, in the drop-down menu, select **Virtual machine**.
+1. In the Azure portal, use the **Search resources, services, and docs** text box at the top of the Azure portal page to search for and navigate to the **Virtual machines** blade, then, on the **Virtual machines** blade, select **+ Create** and, in the drop-down menu, select **Azure virtual machine**.
 
 1. On the **Basics** tab of the **Create a virtual machine** blade, specify the following settings and select **Next: Disks >** (leave all other settings with their default value):
 
@@ -153,7 +153,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
    - Availability set: **az12001a-avset**
 
-   - Image: **SUSE Enterprise Linux for SAP 12 SP5 - BYOS**
+   - Image: **SUSE Enterprise Linux for SAP 12 SP5 - BYOS - Gen 1**
    
    > **Note**: To locate the image, click the **See all images** link, on the **Select an image** blade, in the search text box, type **SUSE Enterprise Linux for SAP 12 BYOS** and, in the list of results, click **SUSE Enterprise Linux for SAP 12 SP5 - BYOS**.
 
@@ -207,7 +207,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
    - Proximity placement group: **az12001a-ppg**
 
-1. On the **Review + create** tab of the **Create Proximity Placement Groups** blade, select **Create**.
+1. On the **Review + create** tab of the **Create a virtual machine** blade, select **Create**.
 
    > **Note**: Wait for the provisioning to complete. This should take less about 3 minutes.
 
@@ -458,12 +458,6 @@ In this exercise, you will configure operating system and storage on Azure VMs r
 
 1. Copy the value of the key into Clipboard.
 
-1. Switch to the Cloud Shell pane containing the SSH session to **az12001a-vm1** and create the directory **/root/.ssh/** by running:
-
-   ```cli
-   mkdir /root/.ssh
-   ```
-
 1. In the Cloud Shell pane, in the SSH session to az12001a-vm1, create a file **/root/.ssh/authorized\_keys** in the vi editor (you are free to use any other editor) by running:
 
    ```cli
@@ -662,7 +656,7 @@ In this exercise, you will implement Azure Load Balancers to accommodate cluster
 
 ### Task 2: Create and configure Azure Load Balancers handling inbound traffic
 
-1. In the Azure portal, use the **Search resources, services, and docs** text box at the top of the Azure portal page to search for and navigate to the **Load balancers** blade and, on the **Load balancers** blade, select **+ Add**.
+1. In the Azure portal, use the **Search resources, services, and docs** text box at the top of the Azure portal page to search for and navigate to the **Load balancers** blade and, on the **Load balancers** blade, select **+ Create**.
 
 1. From the **Basics** tab of the **Create load balancer** blade, specify the following settings and select **Review + create** (leave others with their default values):
 
@@ -674,10 +668,13 @@ In this exercise, you will implement Azure Load Balancers to accommodate cluster
 
    - Region: *the same Azure region where you deployed Azure VMs in the first exercise of this lab*
 
+   - SKU: **Standard**
+   
    - Type: **Internal**
 
-   - SKU: **Standard**
-
+1. Click **Next: Frontend IP Configuration**. On the **Frontend IP configuration** screen, click **Add a frontend IP configuration** and then click **Add**.
+   - Name: frontend1
+   
    - Virtual network: **az12001a-RG-vnet**
 
    - Subnet: **subnet-0**
@@ -688,9 +685,9 @@ In this exercise, you will implement Azure Load Balancers to accommodate cluster
 
    - Availability zone: **Zone redundant**
 
-1. On the **Review + create** blade, select **Create**.
+1. Select **Review + create**, and then select **Create**.
 
-   > **Note**: Wait until the load balancer is provisioned. This shoudl take less than a minute. 
+   > **Note**: Wait until the load balancer is provisioned. This should take less than a minute. 
 
 1. In the Azure portal, navigate to the blade displaying the properties of the newly provisioned **az12001a-lb0** load balancer. 
 
@@ -728,7 +725,7 @@ In this exercise, you will implement Azure Load Balancers to accommodate cluster
 
    - Backend pool: **az12001a-lb0-bepool (2 virtual machines)**
 
-   - Health probe:**az12001a-lb0-hprobe (TCP:62504)**
+   - Health probe:**az12001a-lb0-hprobe (TCP:62500)**
 
    - Session persistence: **None**
 
@@ -798,7 +795,7 @@ In this exercise, you will implement Azure Load Balancers to accommodate cluster
 
    > **Note**: Since two clustered Azure VMs are no longer directly accessible from Internet, you will deploy an Azure VM running Windows Server 2019 Datacenter that will serve as a jump host. 
 
-1. From the lab computer, in the Azure portal, use the **Search resources, services, and docs** text box at the top of the Azure portal page to search for and navigate to the **Virtual machines** blade, then, on the **Virtual machines** blade, select **+ Add** and, in the drop-down menu, select **Virtual machine**.
+1. From the lab computer, in the Azure portal, use the **Search resources, services, and docs** text box at the top of the Azure portal page to search for and navigate to the **Virtual machines** blade, then, on the **Virtual machines** blade, select **+ Create** and, in the drop-down menu, select **Azure virtual machine**.
 
 1. On the **Basics** tab of the **Create a virtual machine** blade, specify the following settings and select **Next: Disks >** (leave all other settings with their default value):
 
@@ -812,7 +809,7 @@ In this exercise, you will implement Azure Load Balancers to accommodate cluster
 
    - Availability options: **No infrastructure redundancy required**
 
-   - Image: **Windows Server 2019 Datacenter - Gen1**
+   - Image: **Windows Server 2019 Datacenter - Gen 2**
 
    - Size: **Standard DS1 v2*** or similar*
 
@@ -868,11 +865,11 @@ In this exercise, you will implement Azure Load Balancers to accommodate cluster
 
    - Enable backup: **Off**
 
-   - Guest OS updates: **Manual patching: Install patches yourself or through a different patching solution**
+   - Guest OS updates: **Manual updates**
 
 1. On the **Advanced** tab of the **Create a virtual machine** blade, select **Review + create** (leave all other settings with their default value):
 
-1. On the **Review + create** tab of the **Create Proximity Placement Groups** blade, select **Create**.
+1. On the **Review + create** tab of the **Create a virtual machine** blade, select **Create**.
 
    > **Note**: Wait for the provisioning to complete. This should take less about 3 minutes.
 

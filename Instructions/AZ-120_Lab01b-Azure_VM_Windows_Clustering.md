@@ -1,11 +1,11 @@
-# AZ 120 Module 1: Foundations of SAP on Azure
-# Lab 1b: Implementing Windows clustering on Azure VMs
+# AZ 120 Module 2: Explore the foundations of IaaS for SAP on Azure
+# Lab 1b: Implement Windows clustering on Azure VMs
 
 Estimated Time: 120 minutes
 
 All tasks in this lab are performed from the Azure portal (including the PowerShell Cloud Shell session)  
 
-   > **Note**: When not using Cloud Shell, the lab virtual machine must have Az PowerShell module installed [**https://docs.microsoft.com/en-us/powershell/azure/install-az-ps-msi?view=azps-2.8.0**](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps-msi?view=azps-2.8.0).
+   > **Note**: When not using Cloud Shell, the lab virtual machine must have Az PowerShell module installed [**https://docs.microsoft.com/en-us/powershell/azure/install-az-ps-msi**](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps-msi).
 
 Lab files: none
 
@@ -27,7 +27,7 @@ After completing this lab, you will be able to:
 
 -   A Microsoft Azure subscription with the sufficient number of available DSv2 and Dsv3 vCPUs (one Standard_DS1_v2 VM with 1 vCPU and four Standard_D4s_v3 VMs with 4 vCPUs each) in the Azure region you intend to use for this lab
 
--   A lab computer running Windows 10, Windows Server 2016, or Windows Server 2019 with access to Azure
+-   A lab computer with an Azure Cloud Shell-compatible web browser and access to Azure
 
 > **Note**: Consider using **East US** or **East US2** regions for deployment of your resources.
 
@@ -35,7 +35,7 @@ After completing this lab, you will be able to:
 
 Duration: 50 minutes
 
-In this exercise, you will deploy Azure infrastructure compute components necessary to configure Failover Clustering on Azure VMs running Windows Server 2019. This will involve deploying a pair of Active Directory domain controllers, followed by a pair of Azure VMs running Windows Server 2019 in the same availability set within the same virtual network. To automate the deployment of domain controllers, you will use an Azure Resource Manager QuickStart template available from <https://github.com/Azure/azure-quickstart-templates/tree/master/active-directory-new-domain-ha-2-dc>
+In this exercise, you will deploy Azure infrastructure compute components necessary to configure Failover Clustering on Azure VMs running Windows Server 2019. This will involve deploying a pair of Active Directory domain controllers, followed by a pair of Azure VMs running Windows Server 2019 in the same availability set within the same virtual network. To automate the deployment of domain controllers, you will use an Azure Resource Manager QuickStart template available from <https://aka.ms/az120-1bdeploy>
 
 ### Task 1: Deploy a pair of Azure VMs running highly available Active Directory domain controllers by using an Azure Resource Manager template
 
@@ -43,23 +43,9 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
 1.  If prompted, sign in with the work or school or personal Microsoft account with the owner or contributor role to the Azure subscription you will be using for this lab.
 
-1.  In the Azure portal, click **+ Create a resource**.
+1.  Open a new web browser tab, navigate to Azure Quickstart Templates page at <https://aka.ms/az120-1bdeploy>, locate the template named **Create 2 new Windows VMs, create a new AD Forest, Domain, and 2 DCs in an availability set**, and initiate its deployment by clicking **Deploy to Azure** button.
 
-1.  From the **New** blade, initiate creation of a new **Template deployment (deploy using custom template)**.
-
-1.  Back on the **Custom deployment** blade, in the **Load a GitHub quickstart template** drop-down list, select the entry **active-directory-new-domain-ha-2-dc**, and click **Select template**.
-
-    > **Note**: Alternatively, you can launch the deployment by navigating to Azure Quickstart Templates page at <https://github.com/Azure/azure-quickstart-templates>, locating the template named **Create 2 new Windows VMs, create a new AD Forest, Domain, and 2 DCs in an availability set**, and initiating its deployment by clicking **Deploy to Azure** button.
-
-1.  On the **Custom deployment** blade, click **Edit template**.
-
-1.  On the **Edit template** blade, apply the following changes and select **Save**:
-
-    -   in the line **66**, replace `"adVMSize": "Standard_DS2_v2",` with `"adVMSize": "Standard_D4s_v3",`
-
-    -   in the line **78**, replace `"imageSKU": "2016-Datacenter",` with `"imageSKU": "2019-Datacenter",`.
-
-1.  Back on the **Create a new AD Domain with 2 Domain Controllers** blade, specify the following settings and click **Review + create**, followed by **Create** to initiate the deployment:
+1.  On the **Custom deployment** blade, specify the following settings and click **Review + create**, followed by **Create** to initiate the deployment:
 
     -   Subscription: *the name of your Azure subscription*
 
@@ -81,17 +67,22 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Bdc RDP Port: **13389**
 
-    -   _artifacts Location: **https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/active-directory-new-domain-ha-2-dc/**
+    -   _artifacts Location: **https://raw.githubusercontent.com/polichtm/azure-quickstart-templates/master/active-directory-new-domain-ha-2-dc/**
 
     -   _artifacts Location Sas Token: *leave blank*
 
-    -   Location: **[resourceGroup().location]**
-    
-    -   Ad VM Size: **Standard_D4s_v3**
-
     > **Note**: The deployment should take about 35 minutes. Wait for the deployment to complete before you proceed to the next task.
 
-### Task 2: Deploy a pair of Azure VMs running Windows Server 2016 in the same availability set.
+    > **Note**: If the deployment fails with the **Conflict** error message during deployment of the CustomScriptExtension component, use the following steps  to remediate this issue:
+
+       - in the Azure portal, on the **Deployment** blade, review the deployment details and identify the VM(s) where the installation of the CustomScriptExtension failed
+
+       - in the Azure portal, navigate to the blade of the VM(s) you identified in the previous step, select **Extensions**, and from the **Extensions** blade, remove the CustomScript extension
+
+       - Navigate to the GitHub quickstart template at <https://aka.ms/az120-1bdeploy>, and select **Deploy to Azure**, select the target resource group (**az12001b-ad-RG**) and provide the password for the root account (**Pa55w.rd1234**).
+
+
+### Task 2: Deploy a pair of Azure VMs running Windows Server 2019 in a new availability set.
 
 1.  From the lab computer, in the Azure portal, click **+ Create a resource**.
 
@@ -109,7 +100,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Availability set: *a new availability set named* **az12001b-cl-avset** *with 2 fault domains and 5 update domains*
 
-    -   Image: **Windows Server 2019 Datacenter**
+    -   Image: **Windows Server 2019 Datacenter - Gen2**
 
     -   Size: **Standard D4s v3**
 
@@ -121,7 +112,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Select inbound ports: **RDP (3389)**
 
-    -   You already have a Windows license?: **No**
+    -   Would you like to use an existing Windows Server license?: **No**
 
     -   OS disk type: **Premium SSD**
 
@@ -145,13 +136,13 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Enable basic plan for free: **No**
 
-    -   Boot diagnostics: **Off**
+    -   Boot diagnostics: **Disable**
 
     -   OS guest diagnostics: **Off**
 
     -   System assigned managed identity: **Off**
 
-    -   Login with AAD credentials (Preview): **Off**
+    -   Login with Azure AD: **Off**
 
     -   Enable auto-shutdown: **Off**
 
@@ -177,7 +168,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Availability set: **az12001b-cl-avset**
 
-    -   Image: **Windows Server 2019 Datacenter**
+    -   Image: **Windows Server 2019 Datacenter - Gen1**
 
     -   Size: **Standard D4s v3**
 
@@ -189,7 +180,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Select inbound ports: **RDP (3389)**
 
-    -   You already have a Windows license?: **No**
+    -   Would you like to use an existing Windows Server license?: **No**
 
     -   OS disk type: **Premium SSD**
 
@@ -211,13 +202,13 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   Enable basic plan for free: **No**
 
-    -   Boot diagnostics: **Off**
+    -   Boot diagnostics: **Disable**
 
     -   OS guest diagnostics: **Off**
 
     -   System assigned managed identity: **Off**
 
-    -   Login with AAD credentials (Preview): **Off**
+    -   Login with Azure AD: **Off**
 
     -   Enable auto-shutdown: **Off**
 
@@ -271,7 +262,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   HOST CACHING: **Read-only**
 
-1.  Repeat the previous step to attach the remaining 3 disks with the prefix **az12001b-cl-vm0-DataDisk** (for the total of 4). Assign the LUN number matching the last character of the disk name. For the last disk (LUN **4**), set HOST CACHING to **None**.
+1.  Repeat the previous step to attach the remaining 3 disks with the prefix **az12001b-cl-vm0-DataDisk** (for the total of 4). Assign the LUN number matching the last character of the disk name. For the last disk (LUN **3**), set HOST CACHING to **None**.
 
 1.  Save your changes. 
 
@@ -289,7 +280,7 @@ In this exercise, you will deploy Azure infrastructure compute components necess
 
     -   HOST CACHING: **Read-only**
 
-1.  Repeat the previous step to attach the remaining 3 disks with the prefix **az12001b-cl-vm1-DataDisk** (for the total of 4). Assign the LUN number matching the last character of the disk name. For the last disk (LUN **4**), set HOST CACHING to **None**.
+1.  Repeat the previous step to attach the remaining 3 disks with the prefix **az12001b-cl-vm1-DataDisk** (for the total of 4). Assign the LUN number matching the last character of the disk name. For the last disk (LUN **3**), set HOST CACHING to **None**.
 
 1.  Save your changes. 
 
@@ -306,7 +297,7 @@ Duration: 40 minutes
 
 1.  In the Azure Portal, navigate to the blade of the virtual network **adVNET**, which was provisioned automatically in the first exercise of this lab.
 
-1.  Display the **adVNET - DNS servers** blade and note that the virtual network is configured with the private IP addresses assigned to the domain controllers deployed in the first exercise of this lab as its DNS servers.
+1.  Display the **adVNET - DNS servers** blade and notice that the virtual network is configured with the private IP addresses assigned to the domain controllers deployed in the first exercise of this lab as its DNS servers.
 
 1.  In the Azure Portal, start a PowerShell session in Cloud Shell. 
 
@@ -339,7 +330,7 @@ Duration: 40 minutes
 
 1.  From the **az12001b-cl-vm0** blade, connect to the virtual machine guest operating system by using Remote Desktop. When prompted to authenticate, provide the following credentials:
 
-    -   User name: **ADATUM\Student**
+    -   User name: **Student**
 
     -   Password: **Pa55w.rd1234**
 
@@ -441,17 +432,15 @@ Duration: 40 minutes
 
     -   Performance: **Standard**
 
-    -   Account kind: **Storage (general purpose v1)**
-
     -   Replication: **Locally-redundant storage (LRS)**
 
     -   Connectivity method: **Public endpoint (all networks)**
 
-    -   Secure transfer required: **Enabled**
+    -   Require secure transfer for REST API operations: **Enabled**
 
     -   Large file shares: **Disabled**
 
-    -   Blob soft delete: **Disabled**
+    -   Soft delete for blobs, containers, and files: **Disabled**
 
     -   Hierarchical namespace: **Disabled**
 
@@ -461,7 +450,7 @@ Duration: 40 minutes
 
 1.  From the **az12001b-cl-vm0** blade, connect to the virtual machine guest operating system by using Remote Desktop. When prompted to authenticate, provide the following credentials:
 
-    -   User name: **ADATUM\\Student**
+    -   User name: **Student**
 
     -   Password: **Pa55w.rd1234**
 
@@ -527,7 +516,7 @@ Duration: 40 minutes
 
 1.  To verify the resulting configuration, within the RDP session to az12001b-cl-vm0, from the **Tools** menu in Server Manager, start **Failover Cluster Manager**.
 
-1.  In the **Failover Cluster Manager** console, review the **az12001b-cl-cl0** cluster configuration, including its nodes, as well as is witness and network settings. Note that the cluster does not have any shared storage.
+1.  In the **Failover Cluster Manager** console, review the **az12001b-cl-cl0** cluster configuration, including its nodes, as well as is witness and network settings. Notice that the cluster does not have any shared storage.
 
 1.  Terminate the RDP session to az12001b-cl-vm0.
 
@@ -594,6 +583,8 @@ In this exercise, you will implement Azure Load Balancers to accommodate cluster
 
     -   SKU: **Standard**
 
+    -   Frontend IP name: **frontend-ip1**
+    
     -   Virtual network: **adVNET**
 
     -   Subnet: **clSubnet**
@@ -602,7 +593,7 @@ In this exercise, you will implement Azure Load Balancers to accommodate cluster
 
     -   IP address: **10.0.1.240**
 
-    -   Availability zone: **No Zone**
+    -   Availability zone: **Zone-redundant**
 
 1.  Wait until the load balancer is provisioned and then navigate to its blade in the Azure portal.
 
@@ -768,7 +759,7 @@ In this exercise, you will implement Azure Load Balancers to accommodate cluster
 
     -   Availability options: **No infrastructure redundancy required**
 
-    -   Image: **Windows Server 2019 Datacenter**
+    -   Image: **Windows Server 2019 Datacenter - Gen2**
 
     -   Size: **Standard DS1 v2*** or similar*
 
